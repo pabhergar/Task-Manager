@@ -35,8 +35,7 @@ import java.util.Locale;
 @RequestMapping("VIEW")
 public class TaskController {
 
-    private static final Logger _logger = LoggerFactory.getLogger(
-            TaskController.class);
+    private static final Logger _logger = LoggerFactory.getLogger(TaskController.class);
     @Autowired
     private LocalValidatorFactoryBean _localValidatorFactoryBean;
     @Autowired
@@ -44,6 +43,7 @@ public class TaskController {
 
     @RenderMapping
     public String showTaskListView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        debugLog("showTaskListView");
         User user = (User) renderRequest.getAttribute(WebKeys.USER);
         if (user != null) {
             List<Task> tasks = TaskLocalServiceUtil.getUserTasks(user.getUserId());
@@ -54,21 +54,24 @@ public class TaskController {
         }
         return "taskList";
     }
+
     @RenderMapping(params = "javax.portlet.action=success")
     public String showTaskListViewAfterSuccess(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        debugLog("showTaskListViewAfterSuccess");
         return showTaskListView(renderRequest, renderResponse, modelMap);
     }
 
     @RenderMapping(params = "view=createTask")
     public String showCreateTaskView(ModelMap modelMap) {
+        debugLog("showCreateTaskView");
         modelMap.put("task", new TaskDTO());
         return "createEditTask";
     }
 
     @RenderMapping(params = "view=editTask")
     public String showEditTaskView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        debugLog("showEditTaskView");
         TaskDTO taskDTO = null;
-
         try {
             Long taskId = Long.parseLong(renderRequest.getRenderParameters().getValue("taskId"));
             Task task = TaskLocalServiceUtil.getTask(taskId);
@@ -92,13 +95,15 @@ public class TaskController {
 
     @RenderMapping(params = "javax.portlet.action=createEditError")
     public String showCreateEditTaskErrorView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        debugLog("showCreateEditTaskErrorView");
         return "createEditTask";
     }
 
     @RenderMapping(params = "view=deleteTask")
     public String showDeleteTaskView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        TaskDTO taskDTO = null;
+        debugLog("showDeleteTaskView");
 
+        TaskDTO taskDTO = null;
         try {
             Long taskId = Long.parseLong(renderRequest.getRenderParameters().getValue("taskId"));
             Task task = TaskLocalServiceUtil.getTask(taskId);
@@ -112,12 +117,13 @@ public class TaskController {
     }
 
     @ActionMapping(params = "action=createTask")
-    public void submitTask(
+    public void createTaskAction(
             @ModelAttribute("task") TaskDTO task, BindingResult bindingResult,
             ModelMap modelMap, Locale locale, ActionRequest actionRequest, ActionResponse actionResponse,
             SessionStatus sessionStatus) {
-        _localValidatorFactoryBean.validate(task, bindingResult);
+        debugLog("createTaskAction");
 
+        _localValidatorFactoryBean.validate(task, bindingResult);
         if (!bindingResult.hasErrors()) {
             User user = (User) actionRequest.getAttribute(WebKeys.USER);
             TaskLocalServiceUtil.createTask(task.getTitle(), task.getText(), user.getUserId());
@@ -138,10 +144,12 @@ public class TaskController {
     }
 
     @ActionMapping(params = "action=editTask")
-    public void editTask(
+    public void editTaskAction(
             @ModelAttribute("task") TaskDTO task, BindingResult bindingResult,
             ModelMap modelMap, Locale locale, ActionRequest actionRequest, ActionResponse actionResponse,
             SessionStatus sessionStatus) {
+        debugLog("editTaskAction");
+
         _localValidatorFactoryBean.validate(task, bindingResult);
         if (!bindingResult.hasErrors()) {
             try {
@@ -167,8 +175,10 @@ public class TaskController {
     }
 
     @RenderMapping(params = "action=updateTaskDone")
-    public String updateTaskDone(
+    public String updateTaskDoneAction(
             RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        debugLog("updateTaskDoneAction");
+
         Long taskId = Long.parseLong(renderRequest.getRenderParameters().getValue("taskId"));
         Boolean done = Boolean.parseBoolean(renderRequest.getRenderParameters().getValue("done"));
         try {
@@ -186,8 +196,10 @@ public class TaskController {
     }
 
     @ActionMapping(params = "action=deleteTask")
-    public void deleteTask(
+    public void deleteTaskAction(
             ActionRequest actionRequest, ActionResponse actionResponse, SessionStatus sessionStatus) {
+        debugLog("deleteTaskAction");
+
         Long taskId = Long.parseLong(actionRequest.getActionParameters().getValue("taskId"));
         try {
             TaskLocalServiceUtil.deleteTask(taskId);
@@ -201,6 +213,12 @@ public class TaskController {
 
         SessionMessages.add(actionRequest, "deleteSuccess");
         sessionStatus.setComplete();
+    }
+
+    private void debugLog(String message) {
+        if (_logger.isDebugEnabled()) {
+            _logger.debug(message);
+        }
     }
 
 }

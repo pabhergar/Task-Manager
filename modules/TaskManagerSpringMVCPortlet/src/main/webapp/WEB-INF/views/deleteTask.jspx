@@ -6,27 +6,38 @@
           xmlns:aui="http://liferay.com/tld/aui"
           version="2.1">
     <jsp:directive.page contentType="text/html" pageEncoding="UTF-8" />
+
     <portlet:defineObjects/>
+
     <portlet:actionURL var="deleteTaskURL">
         <portlet:param name="action" value="deleteTask" />
     </portlet:actionURL>
+
     <portlet:renderURL var="mainRenderURL">
         <portlet:param name="view" value="taskList" />
     </portlet:renderURL>
+
     <form:form id="${namespace}mainForm" action="${deleteTaskURL}" class="task-form" method="post" modelAttribute="task">
+
         <form:errors cssClass="portlet-msg-error" />
+
         <p class="caption">
             <spring:message code="delete-task-confirm" arguments="${task.title}"/>
         </p>
+
         <fieldset>
             <form:hidden id="${namespace}taskId" path="taskId"/>
         </fieldset>
+
         <hr />
+
         <div class="sheet-footer">
             <spring:message code="continue" var="continue" />
             <aui:button type="submit" value="continue"/>
             <spring:message code="cancel" var="cancel" />
             <aui:button type="cancel" value="cancel" href="${mainRenderURL}"/>
         </div>
+
     </form:form>
+
 </jsp:root>

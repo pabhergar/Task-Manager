@@ -8,13 +8,17 @@
           xmlns:aui="http://liferay.com/tld/aui"
           version="2.1">
     <jsp:directive.page contentType="text/html" pageEncoding="UTF-8" />
+
     <portlet:defineObjects/>
+
     <liferay-ui:success key="deleteSuccess" message="delete-task-success-msg"/>
     <liferay-ui:success key="editSuccess" message="edit-task-success-msg"/>
     <liferay-ui:success key="createSuccess" message="create-task-success-msg"/>
     <liferay-ui:success key="updateDoneSuccess" message="update-task-done-success-msg"/>
+
     <c:choose>
         <c:when test="${userLogged}">
+
             <portlet:renderURL var="createTaskURL">
                 <portlet:param name="view" value="createTask" />
             </portlet:renderURL>
@@ -65,9 +69,9 @@
                             scroll="false"
                             showWhenSingleIcon="true"
                         >
-
                             <c:choose>
                                 <c:when test="${subTask.done}">
+
                                     <portlet:renderURL var="updateDoneURL">
                                         <portlet:param name="action" value="updateTaskDone" />
                                         <portlet:param name="taskId" value="${subTask.taskId}" />
@@ -75,8 +79,10 @@
                                     </portlet:renderURL>
                                     <spring:message code="mark-as-pending" var="mark-as-pending"/>
                                     <liferay-ui:icon image="unchecked" message="mark-as-pending" label="true" markupView="lexicon" url="${updateDoneURL}"/>
+
                                 </c:when>
                                 <c:otherwise>
+
                                     <portlet:renderURL var="updateDoneURL">
                                         <portlet:param name="action" value="updateTaskDone" />
                                         <portlet:param name="taskId" value="${subTask.taskId}" />
@@ -84,6 +90,7 @@
                                     </portlet:renderURL>
                                     <spring:message code="mark-as-done" var="mark-as-done"/>
                                     <liferay-ui:icon image="checked" message="mark-as-done" label="true" markupView="lexicon" url="${updateDoneURL}"/>
+
                                 </c:otherwise>
                             </c:choose>
 
@@ -102,10 +109,14 @@
                 <spring:message code="create-task" var="create-task"/>
                 <aui:button type="button" value="create-task" primary="true" href="${createTaskURL}"/>
             </div>
+
         </c:when>
         <c:otherwise>
+
             <spring:message code="not-logged"/>
+
         </c:otherwise>
     </c:choose>
+
 </jsp:root>
 

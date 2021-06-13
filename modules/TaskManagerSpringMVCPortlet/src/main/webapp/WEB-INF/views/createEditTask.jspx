@@ -8,9 +8,12 @@
           xmlns:liferay-ui="http://liferay.com/tld/ui"
           version="2.1">
     <jsp:directive.page contentType="text/html" pageEncoding="UTF-8" />
+
     <portlet:defineObjects/>
+
     <liferay-ui:error key="createError" message="create-task-error-msg"/>
     <liferay-ui:error key="editError" message="edit-task-error-msg"/>
+
     <portlet:actionURL var="actionURL">
         <c:if test="${task.taskId != 0}">
             <portlet:param name="action" value="editTask" />
@@ -19,11 +22,15 @@
             <portlet:param name="action" value="createTask" />
         </c:if>
     </portlet:actionURL>
+
     <portlet:renderURL var="mainRenderURL">
         <portlet:param name="view" value="taskList" />
     </portlet:renderURL>
+
     <form:form id="${namespace}mainForm" action="${actionURL}" class="task-form" method="post" modelAttribute="task">
+
         <form:errors cssClass="portlet-msg-error" />
+
         <p class="caption">
             <c:if test="${task.taskId != 0}">
                 <spring:message code="edit-task" />
@@ -32,8 +39,11 @@
                 <spring:message code="create-task" />
             </c:if>
         </p>
+
         <fieldset>
+
             <form:hidden id="${namespace}taskId" path="taskId"/>
+
             <div class="form-group">
                 <form:label for="${namespace}title" path="title">
                     <spring:message code="title" />
@@ -41,6 +51,7 @@
                 <form:input id="${namespace}title" cssClass="form-control" path="title"/>
                 <form:errors path="title" cssClass="portlet-msg-error"/>
             </div>
+
             <div class="form-group">
                 <form:label for="${namespace}text" path="text">
                     <spring:message code="text" />
@@ -48,13 +59,18 @@
                 <form:input id="${namespace}text" cssClass="form-control" path="text"/>
                 <form:errors path="text" cssClass="portlet-msg-error"/>
             </div>
+
         </fieldset>
+
         <hr />
+
         <div class="sheet-footer">
             <spring:message code="submit" var="submit" />
             <aui:button type="submit" value="submit"/>
             <spring:message code="cancel" var="cancel" />
             <aui:button type="cancel" value="cancel" href="${mainRenderURL}"/>
         </div>
+
     </form:form>
+
 </jsp:root>
