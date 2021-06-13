@@ -25,7 +25,6 @@ import taskmanagerservicebuilder.service.TaskLocalServiceUtil;
 import taskmanagerspringmvcportlet.dto.TaskDTO;
 
 import javax.portlet.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -43,15 +42,8 @@ public class TaskController {
     @Autowired
     private MessageSource _messageSource;
 
-    @ModelAttribute("taskDTO")
-    public TaskDTO getTaskDTOModel() {
-        System.out.println("ZZZ ModelAttribute TaskDTO");
-        return new TaskDTO();
-    }
-
     @RenderMapping
-    public String prepareView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Default");
+    public String showTaskListView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
         User user = (User) renderRequest.getAttribute(WebKeys.USER);
         if (user != null) {
             List<Task> tasks = TaskLocalServiceUtil.getUserTasks(user.getUserId());
@@ -62,48 +54,19 @@ public class TaskController {
         }
         return "taskList";
     }
-
-    private List<TaskDTO> transformTaskList(List<Task> tasks) {
-        List<TaskDTO> taskList = new ArrayList<>();
-        TaskDTO taskDTO;
-        for (Task task : tasks) {
-            taskDTO = new TaskDTO();
-            taskDTO.setTaskId(task.getTaskId());
-            taskDTO.setDone(task.getDone());
-            taskDTO.setTitle(task.getTitle());
-            taskDTO.setText(task.getText());
-            taskList.add(taskDTO);
-        }
-        return taskList;
-    }
-
     @RenderMapping(params = "javax.portlet.action=success")
-    public String showTaskListView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Show Task List");
-        return prepareView(renderRequest, renderResponse, modelMap);
-    }
-
-    @RenderMapping(params = "javax.portlet.action=editError")
-    public String showEditTaskError(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Show Edit Task Error");
-        return "editTask";
+    public String showTaskListViewAfterSuccess(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        return showTaskListView(renderRequest, renderResponse, modelMap);
     }
 
     @RenderMapping(params = "view=createTask")
-    public String showCreateTaskView() {
-        System.out.println("ZZZ Render Mapping Create Task");
-        return "createTask";
-    }
-
-    @RenderMapping(params = "javax.portlet.action=createError")
-    public String showCreateTaskError(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Show Create Task Error");
-        return "createTask";
+    public String showCreateTaskView(ModelMap modelMap) {
+        modelMap.put("task", new TaskDTO());
+        return "createEditTask";
     }
 
     @RenderMapping(params = "view=editTask")
     public String showEditTaskView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Edit Task");
         TaskDTO taskDTO = null;
 
         try {
@@ -115,7 +78,7 @@ public class TaskController {
         }
         modelMap.put("task", taskDTO);
 
-        return "editTask";
+        return "createEditTask";
     }
 
     private TaskDTO transformTask(Task task) {
@@ -127,9 +90,13 @@ public class TaskController {
         return taskDTO;
     }
 
+    @RenderMapping(params = "javax.portlet.action=createEditError")
+    public String showCreateEditTaskErrorView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        return "createEditTask";
+    }
+
     @RenderMapping(params = "view=deleteTask")
     public String showDeleteTaskView(RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Render Mapping Delete Task");
         TaskDTO taskDTO = null;
 
         try {
@@ -144,12 +111,11 @@ public class TaskController {
         return "deleteTask";
     }
 
-    @ActionMapping
+    @ActionMapping(params = "action=createTask")
     public void submitTask(
             @ModelAttribute("task") TaskDTO task, BindingResult bindingResult,
             ModelMap modelMap, Locale locale, ActionRequest actionRequest, ActionResponse actionResponse,
             SessionStatus sessionStatus) {
-        System.out.println("ZZZ Submit Task Action");
         _localValidatorFactoryBean.validate(task, bindingResult);
 
         if (!bindingResult.hasErrors()) {
@@ -163,7 +129,7 @@ public class TaskController {
             sessionStatus.setComplete();
         } else {
             MutableRenderParameters mutableRenderParameters = actionResponse.getRenderParameters();
-            mutableRenderParameters.setValue("javax.portlet.action", "createError");
+            mutableRenderParameters.setValue("javax.portlet.action", "createEditError");
 
             SessionErrors.add(actionRequest, "createError");
             bindingResult.addError(new ObjectError("task",
@@ -171,32 +137,11 @@ public class TaskController {
         }
     }
 
-    @RenderMapping(params = "action=updateTaskDone")
-    public String updateTaskDone(
-            RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
-        System.out.println("ZZZ Update Task Done Render?");
-        Long taskId = Long.parseLong(renderRequest.getRenderParameters().getValue("taskId"));
-        Boolean done = Boolean.parseBoolean(renderRequest.getRenderParameters().getValue("done"));
-        try {
-            if (done) {
-                TaskLocalServiceUtil.doTask(taskId);
-            } else {
-                TaskLocalServiceUtil.undoTask(taskId);
-            }
-        } catch (NoSuchTaskException e) {
-            e.printStackTrace();
-        }
-
-        SessionMessages.add(renderRequest, "updateDoneSuccess");
-        return prepareView(renderRequest, renderResponse, modelMap);
-    }
-
     @ActionMapping(params = "action=editTask")
     public void editTask(
             @ModelAttribute("task") TaskDTO task, BindingResult bindingResult,
             ModelMap modelMap, Locale locale, ActionRequest actionRequest, ActionResponse actionResponse,
             SessionStatus sessionStatus) {
-        System.out.println("ZZZ Edit task Action");
         _localValidatorFactoryBean.validate(task, bindingResult);
         if (!bindingResult.hasErrors()) {
             try {
@@ -211,7 +156,7 @@ public class TaskController {
             sessionStatus.setComplete();
         } else {
             MutableRenderParameters mutableRenderParameters = actionResponse.getRenderParameters();
-            mutableRenderParameters.setValue("javax.portlet.action", "editError");
+            mutableRenderParameters.setValue("javax.portlet.action", "createEditError");
 
 
             SessionErrors.add(actionRequest, "editError");
@@ -221,10 +166,28 @@ public class TaskController {
 
     }
 
+    @RenderMapping(params = "action=updateTaskDone")
+    public String updateTaskDone(
+            RenderRequest renderRequest, RenderResponse renderResponse, ModelMap modelMap) {
+        Long taskId = Long.parseLong(renderRequest.getRenderParameters().getValue("taskId"));
+        Boolean done = Boolean.parseBoolean(renderRequest.getRenderParameters().getValue("done"));
+        try {
+            if (done) {
+                TaskLocalServiceUtil.doTask(taskId);
+            } else {
+                TaskLocalServiceUtil.undoTask(taskId);
+            }
+        } catch (NoSuchTaskException e) {
+            e.printStackTrace();
+        }
+
+        SessionMessages.add(renderRequest, "updateDoneSuccess");
+        return showTaskListView(renderRequest, renderResponse, modelMap);
+    }
+
     @ActionMapping(params = "action=deleteTask")
     public void deleteTask(
             ActionRequest actionRequest, ActionResponse actionResponse, SessionStatus sessionStatus) {
-        System.out.println("ZZZ Delete task Action");
         Long taskId = Long.parseLong(actionRequest.getActionParameters().getValue("taskId"));
         try {
             TaskLocalServiceUtil.deleteTask(taskId);

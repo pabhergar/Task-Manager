@@ -38,7 +38,7 @@ public class TaskDTO implements Serializable {
         this.title = title;
     }
 
-    private long taskId;
+    private long taskId=0;
     @NotEmpty
     private String title;
     private String text;

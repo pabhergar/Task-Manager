@@ -3,20 +3,34 @@
           xmlns:portlet="http://xmlns.jcp.org/portlet_3_0"
           xmlns:spring="http://www.springframework.org/tags"
           xmlns:form="http://www.springframework.org/tags/form"
+          xmlns:c="http://java.sun.com/jsp/jstl/core"
           xmlns:aui="http://liferay.com/tld/aui"
+          xmlns:liferay-ui="http://liferay.com/tld/ui"
           version="2.1">
     <jsp:directive.page contentType="text/html" pageEncoding="UTF-8" />
     <portlet:defineObjects/>
-    <portlet:actionURL var="editTaskURL">
-        <portlet:param name="action" value="editTask" />
+    <liferay-ui:error key="createError" message="create-task-error-msg"/>
+    <liferay-ui:error key="editError" message="edit-task-error-msg"/>
+    <portlet:actionURL var="actionURL">
+        <c:if test="${task.taskId != 0}">
+            <portlet:param name="action" value="editTask" />
+        </c:if>
+        <c:if test="${task.taskId == 0}">
+            <portlet:param name="action" value="createTask" />
+        </c:if>
     </portlet:actionURL>
     <portlet:renderURL var="mainRenderURL">
         <portlet:param name="view" value="taskList" />
     </portlet:renderURL>
-    <form:form id="${namespace}mainForm" action="${editTaskURL}" class="task-form" method="post" modelAttribute="task">
+    <form:form id="${namespace}mainForm" action="${actionURL}" class="task-form" method="post" modelAttribute="task">
         <form:errors cssClass="portlet-msg-error" />
         <p class="caption">
-            <spring:message code="edit-task" />
+            <c:if test="${task.taskId != 0}">
+                <spring:message code="edit-task" />
+            </c:if>
+            <c:if test="${task.taskId == 0}">
+                <spring:message code="create-task" />
+            </c:if>
         </p>
         <fieldset>
             <form:hidden id="${namespace}taskId" path="taskId"/>
