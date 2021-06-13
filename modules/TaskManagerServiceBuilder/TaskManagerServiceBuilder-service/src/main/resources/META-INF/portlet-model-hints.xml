@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+
+<model-hints>
+	<model name="taskmanagerservicebuilder.model.Task">
+		<field name="uuid" type="String" />
+		<field name="taskId" type="long" />
+		<field name="title" type="String" />
+		<field name="text" type="String" />
+		<field name="userId" type="long" />
+		<field name="done" type="boolean" />
+	</model>
+</model-hints>
